@@ -1,0 +1,47 @@
+{
+  "name": "autopilot-mini-app",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test:sheets": "ts-node --project tsconfig.test.json testGoogleSheets.ts"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.11.10",
+    "@farcaster/frame-core": "^0.1.1",
+    "@farcaster/frame-sdk": "^0.0.52",
+    "@farcaster/frame-wagmi-connector": "^0.0.41",
+    "@tanstack/react-query": "^5.61.0",
+    "axios": "^1.9.0",
+    "googleapis": "^144.0.0",
+    "graphql": "^16.0.0",
+    "next": "15.0.3",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "viem": "2.x",
+    "wagmi": "^2.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.21",
+    "dotenv": "^16.5.0",
+    "eslint": "^8",
+    "eslint-config-next": "15.0.3",
+    "pino-pretty": "^13.0.0",
+    "postcss": "^8.5.3",
+    "prettier": "^3.5.3",
+    "tailwindcss": "^3.4.17",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5"
+  }
+}
