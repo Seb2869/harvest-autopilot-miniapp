@@ -136,9 +136,9 @@ export default function RevertModal({
     walletAddress,
     selectedVault.vaultAddress,
     selectedToken.address,
+    selectedToken.decimals,
     withdrawAmount,
     selectedVault.vaultDecimals,
-    selectedToken.decimals,
     getPortalsEstimate,
   ]);
 
@@ -146,13 +146,11 @@ export default function RevertModal({
   useEffect(() => {
     if (isConfirmed && txHash) {
       if (isWaitingForApproval) {
+        console.log("Transaction confirmed, updating state directly");
         setIsWaitingForApproval(false);
-        setNeedsApproval(false); // Set approval state to false when confirmed
-
-        // Only move to step 1 if we're not already at step 2
-        if (currentStep < 2) {
-          setCurrentStep(1); // Move to withdraw step
-          checkApproval(); // Double check approval status
+        // When approval is confirmed, immediately check if we need further approval
+        if (currentStep === 0) {
+          checkApproval(); // This will set the correct step based on approval status
         }
       }
 
@@ -200,7 +198,49 @@ export default function RevertModal({
     onSuccess,
   ]);
 
-  // Check if approval is needed
+  // Check approval when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      checkApproval();
+    }
+  }, [isOpen, checkApproval]);
+
+  // Add a polling mechanism to recheck approval status after a transaction
+  useEffect(() => {
+    let timerId: NodeJS.Timeout | null = null;
+
+    // When an approval transaction is confirmed, check approval status multiple times
+    if (isConfirmed && isWaitingForApproval && currentStep === 0) {
+      // Set up polling to check approval status
+      let checkCount = 0;
+
+      const recheckApproval = () => {
+        checkCount++;
+
+        checkApproval().then(() => {
+          // If we still need approval after 5 checks, stop checking
+          if (checkCount >= 5) {
+            if (timerId) clearInterval(timerId);
+            // Force move to next step if we've checked 5 times
+            setNeedsApproval(false);
+            setCurrentStep(1);
+            setIsWaitingForApproval(false);
+          }
+        });
+      };
+
+      // Check immediately and then every 3 seconds
+      recheckApproval();
+      timerId = setInterval(recheckApproval, 3000);
+    }
+
+    // Clean up interval
+    return () => {
+      if (timerId) clearInterval(timerId);
+    };
+  }, [isConfirmed, isWaitingForApproval, currentStep, checkApproval]);
+
+  // Check if approval is needed when dependencies change
   useEffect(() => {
     checkApproval();
   }, [
@@ -212,15 +252,14 @@ export default function RevertModal({
     checkApproval,
   ]);
 
-  // Check approval when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      checkApproval();
-    }
-  }, [isOpen, checkApproval]);
-
   const handleApprove = async () => {
     if (!walletAddress || !selectedVault.vaultAddress) return;
+
+    if (isConfirmed && txHash && !isWaitingForApproval) {
+      setNeedsApproval(false);
+      setCurrentStep(1);
+      return;
+    }
 
     await handleWalletInteraction(async () => {
       try {
@@ -266,6 +305,11 @@ export default function RevertModal({
         });
 
         setTxHash(hash as `0x${string}`);
+
+        // Explicitly update both states together
+        setNeedsApproval(false);
+        setCurrentStep(1);
+
         // eslint-disable-line @typescript-eslint/no-explicit-any
       } catch (error: unknown) {
         console.error("Approval error:", error);
@@ -432,7 +476,7 @@ export default function RevertModal({
             />
           </div>
           <div className="flex justify-between text-sm">
-            <span className={needsApproval ? "" : "text-gray-400"}>
+            <span className={currentStep > 0 ? "text-gray-400" : ""}>
               {needsApproval
                 ? isWaitingForApproval
                   ? "Approving..."
@@ -452,7 +496,7 @@ export default function RevertModal({
               You Withdraw
             </span>
             <div className="text-right">
-              <div>
+              <div className="text-green-600 dark:text-green-400 font-medium">
                 {formatBalance(withdrawAmount)} {selectedVault.vaultSymbol}
               </div>
             </div>
@@ -464,7 +508,7 @@ export default function RevertModal({
               You Receive (estimated)
             </span>
             <div className="text-right">
-              <div>
+              <div className="text-green-600 dark:text-green-400 font-medium">
                 {estimatedOutput
                   ? `${formatBalance(estimatedOutput)} ${selectedToken.symbol}`
                   : "Calculating..."}
@@ -505,9 +549,9 @@ export default function RevertModal({
         {/* Action Button */}
         <Button
           onClick={
-            currentStep === 0
+            currentStep === 0 && needsApproval
               ? handleApprove
-              : currentStep === 1
+              : currentStep === 1 || (currentStep === 0 && !needsApproval)
                 ? handleWithdraw
                 : handleClose
           }
@@ -515,19 +559,11 @@ export default function RevertModal({
           isLoading={isTransactionInProgress}
           className="w-full relative"
         >
-          {isTransactionInProgress
-            ? isWaitingForApproval
-              ? "Waiting for Approval..."
-              : isApproveLoading
-                ? "Approving..."
-                : isWithdrawLoading
-                  ? "Withdrawing..."
-                  : "Processing..."
-            : currentStep === 0 && needsApproval
-              ? "Approve"
-              : currentStep === 1 || (currentStep === 0 && !needsApproval)
-                ? "Withdraw"
-                : "Complete"}
+          {currentStep === 0 && needsApproval
+            ? "Approve"
+            : currentStep === 1 || (currentStep === 0 && !needsApproval)
+              ? "Withdraw"
+              : "Complete"}
           {isTransactionInProgress && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

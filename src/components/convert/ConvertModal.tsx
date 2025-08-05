@@ -60,27 +60,41 @@ export default function ConvertModal({
         return;
       }
 
-      const approval = await getPortalsApproval(
-        chainId,
-        walletAddress,
-        selectedToken.address,
-      );
-      const allowance = approval ? approval.allowance : "0";
+      try {
+        const approval = await getPortalsApproval(
+          chainId,
+          String(walletAddress),
+          selectedToken.address,
+        );
+        const allowance = approval ? approval.allowance : "0";
 
-      const needsApprove = !new BigNumber(allowance.toString()).gte(
-        new BigNumber(value.toString()),
-      );
-      setNeedsApproval(needsApprove);
+        const needsApprove = !new BigNumber(allowance.toString()).gte(
+          new BigNumber(value.toString()),
+        );
 
-      if (!needsApprove) {
-        setCurrentStep(1);
-      } else {
+        // Update needs approval state
+        setNeedsApproval(needsApprove);
+
+        // Important: Update the current step based on approval status
+        if (!needsApprove) {
+          setCurrentStep(1); // Move to Convert step
+        } else {
+          setCurrentStep(0); // Stay at Approve step
+        }
+
+        // Reset any waiting state
+        setIsWaitingForApproval(false);
+      } catch (error) {
+        console.error("Error checking approval:", error);
+        // If we fail to check approval, let's just proceed to approval step
+        setNeedsApproval(true);
         setCurrentStep(0);
       }
     } catch (err) {
-      console.error("Error checking approval:", err);
+      console.error("Error in approval flow:", err);
       setError("Failed to check token approval. Please try again.");
       setCurrentStep(0);
+      setIsWaitingForApproval(false);
     }
   }, [
     walletAddress,
@@ -90,9 +104,6 @@ export default function ConvertModal({
     vaultAddress,
     depositAmount,
     chainId,
-    setNeedsApproval,
-    setCurrentStep,
-    setError,
     getPortalsApproval,
   ]);
 
@@ -101,10 +112,11 @@ export default function ConvertModal({
     if (isConfirmed && txHash) {
       if (isWaitingForApproval) {
         setIsWaitingForApproval(false);
-        // Only check approval if we're in the approval step
-        // This prevents us from going back to step 1 if we're in step 2
-        if (currentStep < 2) {
-          checkApproval(); // Check approval status again
+        // Don't reset currentStep here - wait until checkApproval completes
+
+        // When approval is confirmed, immediately check if we need further approval
+        if (currentStep === 0) {
+          checkApproval(); // This will set the correct step based on approval status
         }
       }
 
@@ -162,8 +174,49 @@ export default function ConvertModal({
     }
   }, [isOpen, checkApproval]);
 
+  // Add a polling mechanism to recheck approval status after a transaction
+  useEffect(() => {
+    let timerId: NodeJS.Timeout | null = null;
+
+    // When an approval transaction is confirmed, check approval status multiple times
+    if (isConfirmed && isWaitingForApproval && currentStep === 0) {
+      // Set up polling to check approval status
+      let checkCount = 0;
+
+      const recheckApproval = () => {
+        checkCount++;
+
+        checkApproval().then(() => {
+          // If we still need approval after 5 checks, stop checking
+          if (checkCount >= 5) {
+            if (timerId) clearInterval(timerId);
+            // Force move to next step if we've checked 5 times
+            setNeedsApproval(false);
+            setCurrentStep(1);
+            setIsWaitingForApproval(false);
+          }
+        });
+      };
+
+      // Check immediately and then every 3 seconds
+      recheckApproval();
+      timerId = setInterval(recheckApproval, 3000);
+    }
+
+    // Clean up interval
+    return () => {
+      if (timerId) clearInterval(timerId);
+    };
+  }, [isConfirmed, isWaitingForApproval, currentStep, checkApproval]);
+
   const handleApprove = async () => {
     if (!walletAddress || !selectedToken.address || !vaultAddress) return;
+
+    if (isConfirmed && txHash && !isWaitingForApproval) {
+      setNeedsApproval(false);
+      setCurrentStep(1);
+      return;
+    }
 
     await handleWalletInteraction(async () => {
       try {
@@ -197,8 +250,26 @@ export default function ConvertModal({
           selectedToken.address,
           value.toString(),
         );
-        if (!approvalData?.approve) {
-          throw new Error("Failed to get approval data from Portals");
+
+        // Add more detailed checking and logging for approval data
+        if (!approvalData) {
+          console.error(
+            "No approval data returned - this could mean approval is already sufficient",
+          );
+          setNeedsApproval(false);
+          setCurrentStep(1);
+          setIsWaitingForApproval(false);
+          setIsApproveLoading(false);
+          return;
+        }
+
+        if (!approvalData.approve) {
+          console.error("Approval data missing 'approve' field:", approvalData);
+          setNeedsApproval(false);
+          setCurrentStep(1);
+          setIsWaitingForApproval(false);
+          setIsApproveLoading(false);
+          return;
         }
 
         const hash = await sendTransactionAsync({
@@ -209,6 +280,8 @@ export default function ConvertModal({
         if (hash) {
           setTxHash(hash);
         }
+        setNeedsApproval(false);
+        setCurrentStep(1); // Explicitly set to step 1 (Convert)
       } catch (error: unknown) {
         console.error("Approval error:", error);
         const message =
@@ -400,7 +473,7 @@ export default function ConvertModal({
           <div className="flex justify-between mb-2">
             <span className="text-gray-600 dark:text-gray-300">Amount</span>
             <div className="text-right">
-              <div>
+              <div className="text-green-600 dark:text-green-400 font-medium">
                 {formatBalance(depositAmount)} {selectedToken.symbol}
               </div>
               <div className="text-sm text-gray-500">
@@ -446,9 +519,9 @@ export default function ConvertModal({
         {/* Action Button */}
         <Button
           onClick={
-            currentStep === 0
+            currentStep === 0 && needsApproval
               ? handleApprove
-              : currentStep === 1
+              : currentStep === 1 || (currentStep === 0 && !needsApproval)
                 ? handleDeposit
                 : handleClose
           }
@@ -458,19 +531,11 @@ export default function ConvertModal({
           isLoading={isTransactionInProgress}
           className="w-full relative"
         >
-          {isTransactionInProgress
-            ? isWaitingForApproval
-              ? "Waiting for Approval..."
-              : isApproveLoading
-                ? "Approving..."
-                : isDepositLoading
-                  ? "Converting..."
-                  : "Processing..."
-            : currentStep === 0 && needsApproval
-              ? "Approve"
-              : currentStep === 1 || (currentStep === 0 && !needsApproval)
-                ? "Convert"
-                : "Complete"}
+          {currentStep === 0 && needsApproval
+            ? "Approve"
+            : currentStep === 1 || (currentStep === 0 && !needsApproval)
+              ? "Convert"
+              : "Complete"}
           {isTransactionInProgress && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

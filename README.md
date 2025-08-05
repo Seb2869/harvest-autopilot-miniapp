@@ -12,6 +12,8 @@ A DeFi mini-app built for Farcaster Frames that enables users to easily convert 
 - **Dark Mode Support**: Seamless experience in both light and dark modes
 - **Transaction Tracking**: View and track your transaction status with links to block explorer
 - **Native Farcaster Integration**: Seamless wallet connection through Farcaster Frame
+- **View Vault Analytics**: Interactive charts to monitor vault performance
+- **Monitor User Positions**: Track user balances and positions
 
 ## Supported Vaults
 

@@ -17,6 +17,7 @@ export const SUPPORTED_VAULTS: VaultInfo[] = [
     balanceUSD: "0",
     images: ["/images/tokens/usdc.svg"],
     vaultSymbol: "bAutopilot_USDC",
+    rawBalance: "0",
   },
   {
     symbol: "WETH",
@@ -31,6 +32,7 @@ export const SUPPORTED_VAULTS: VaultInfo[] = [
     balanceUSD: "0",
     images: ["/images/tokens/eth.svg"],
     vaultSymbol: "bAutopilot_wETH",
+    rawBalance: "0",
   },
   {
     symbol: "cbBTC",
@@ -45,6 +47,7 @@ export const SUPPORTED_VAULTS: VaultInfo[] = [
     balanceUSD: "0",
     images: ["/images/tokens/cbbtc.svg"],
     vaultSymbol: "bAutopilot_cbBTC",
+    rawBalance: "0",
   },
 ];
 

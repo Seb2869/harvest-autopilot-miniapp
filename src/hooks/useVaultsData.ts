@@ -6,6 +6,9 @@ interface HarvestVaultData {
   estimatedApy: string;
   totalValueLocked: string;
   inactive: boolean;
+  usdPrice?: string; // Token price in USD
+  sharePrice?: string; // Vault share price
+  pricePerFullShare?: string; // Alternative field that might be available
 }
 
 interface VaultsData {
