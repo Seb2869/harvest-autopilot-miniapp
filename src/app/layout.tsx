@@ -3,34 +3,34 @@ import type { Metadata } from "next";
 import "~/app/globals.css";
 import { Providers } from "~/app/providers";
 
-const BASE_URL = "harvest-autopilot.netlify.app";
+const BASE_URL = "miniapp.harvest.finance";
 const domain = BASE_URL ? `https://${BASE_URL}` : "http://localhost:3000";
 
 const frame = {
   version: "next",
   imageUrl: `${domain}/harvest-thumbnail.png`,
   button: {
-    title: "Deposit 🌾",
+    title: "Use Autopilot",
     action: {
       type: "launch_frame",
-      name: "Harvest on Autopilot 🌾",
+      name: "Yield Autopilot",
       url: domain,
       splashImageUrl: `${domain}/splash.png`,
-      splashBackgroundColor: "#ffffff",
+      splashBackgroundColor: "#f7cf50",
     },
   },
 };
 
 export const metadata: Metadata = {
-  title: "Harvest on Autopilot 🌾",
-  description: "Harvest on Autopilot 🌾",
+  title: "Yield Autopilot",
+  description: "Put your USDC, ETH or cbBTC to work with Autopilot that allocates to the best performing yield sources.",
   openGraph: {
-    title: "Harvest on Autopilot 🌾",
-    description: "Harvest on Autopilot 🌾",
+    title: "Yield Autopilot",
+    description: "Put your USDC, ETH or cbBTC to work with Autopilot that allocates to the best performing yield sources.",
     images: [
       {
         url: `${domain}/harvest-thumbnail.png`,
-        alt: "Harvest on Autopilot 🌾",
+        alt: "Yield Autopilot",
       },
     ],
   },
