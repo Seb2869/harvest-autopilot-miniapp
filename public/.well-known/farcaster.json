@@ -7,13 +7,13 @@
   "frame": {
     "version": "0.0.1",
     "name": "Harvest on Autopilot 🌾",
-    "iconUrl": "https://harvest-autopilot.netlify.app/icon.png",
-    "homeUrl": "https://harvest-autopilot.netlify.app",
-    "imageUrl": "https://harvest-autopilot.netlify.app/image.png",
+    "iconUrl": "https://miniapp.harvest.finance/icon.png",
+    "homeUrl": "https://miniapp.harvest.finance",
+    "imageUrl": "https://miniapp.harvest.finance/image.png",
     "buttonTitle": "Check this out",
-    "splashImageUrl": "https://harvest-autopilot.netlify.app/splash.png",
+    "splashImageUrl": "https://miniapp.harvest.finance/splash.png",
     "splashBackgroundColor": "#ffffff",
     "primaryCategory": "finance",
-    "webhookUrl": "https://harvest-autopilot.netlify.app/api/webhook"
+    "webhookUrl": "https://miniapp.harvest.finance/api/webhook"
   }
 }

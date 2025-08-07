@@ -8,7 +8,7 @@ export async function GET() {
       icon: `${appUrl}/icon.png`,
       splashImage: `${appUrl}/splash.png`,
       splashBackgroundColor: "#ffffff",
-      homeUrl: "https://harvest-autopilot.netlify.app",
+      homeUrl: "https://miniapp.harvest.finance",
       fid: 1091383,
       key: "",
       signature: "",
