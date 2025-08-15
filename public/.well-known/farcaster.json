@@ -5,13 +5,13 @@
     "iconUrl": "https://miniapp.harvest.finance/icon.png",
     "homeUrl": "https://miniapp.harvest.finance",
     "imageUrl": "https://miniapp.harvest.finance/image.png",
-    "buttonTitle": "Earn Yield Now",
     "splashImageUrl": "https://miniapp.harvest.finance/splash.png",
-    "splashBackgroundColor": "#f7cf50",
     "webhookUrl": "https://miniapp.harvest.finance/api/webhook",
-    "subtitle": "Earn Crypto Yield on Autopilot ",
-    "description": "Put your USDC, ETH or cbBTC to work with Autopilot that allocates to the best performing yield sources.",
+    "subtitle": "Earn Crypto Yield on Autopilot",
+    "description": "Put Your Crypto on Autopilot and Earn From the Best Performing Yield Sources",
     "primaryCategory": "finance",
+    "buttonTitle": "Earn Yield Now",
+    "splashBackgroundColor": "#f7cf50",
     "tags": [
       "yield",
       "earn",
@@ -24,8 +24,8 @@
     "ogDescription": "Put your USDC, ETH or cbBTC to work with Autopilot that allocates to the best yield sources."
   },
   "accountAssociation": {
-    "header": "eyJmaWQiOjEwOTQ4NDAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg3QUZiZjhiMGEyMTMxOTZlZUYwMkQzMTgxQThFODlhZTZjQWRGMGI0In0",
+    "header": "eyJmaWQiOjEwOTQ4NDAsInR5cGUiOiJhdXRoIiwia2V5IjoiMHgwMzgzYkRjMzgxOTY0ZGIwNUE0NUFlODhlOEZhQjZjRjUyREM2RDg3In0",
     "payload": "eyJkb21haW4iOiJtaW5pYXBwLmhhcnZlc3QuZmluYW5jZSJ9",
-    "signature": "MHgxZjU5NzJmMDIwMmJhYWY0YWJmNzI2ODM5Yjc1N2E1OGYzMzA1NmI4ZjkzZmQ4ZmRmMmI0NjQyMWQ5Y2I3MjkxNWFlMTA4NWQ0YTc3MGUyODdhODAwYTY5OTM5YWUxMTk5MzUxNGYyYTQ2ZjBiMTJjZTA3ZjY1MzI2YjcxOGRmYTFj"
+    "signature": "HySB8/HGZF2RoblW0tJFKB3dVutGJxsWEpxn9Q1ppftncldQWXaDXS47n9Amgy1LUxUQLr+/alilQnM250kMXxs="
   }
 }
